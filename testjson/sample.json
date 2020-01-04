@@ -1,0 +1,33 @@
+{
+    "machine": "machine_name",
+    "init_state": "Closed",
+    "transition_table": [
+        {
+            "start": "Closed",
+            "event": "OpenClose",
+            "target": "Opened",
+            "action": true,
+            "guard": true
+        },
+        {
+            "start": "Opened",
+            "event": "OpenClose",
+            "target": "Closed",
+            "action": true
+        },
+        {
+            "start": "Closed",
+            "event": "Play",
+            "target": "Playing",
+            "action": true,
+            "guard": true
+        },
+        [
+            "Playing",
+            "Stop",
+            "Closed",
+            false,
+            true
+        ]
+    ]
+}

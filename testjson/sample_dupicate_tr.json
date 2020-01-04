@@ -1,0 +1,39 @@
+{
+    "machine": "machine_name",
+    "init_state": "init_state",
+    "transition_table": [
+        {
+            "start": "Closed",
+            "event": "OpenClose",
+            "target": "Opend",
+            "action": true,
+            "guard": false
+        },
+        {
+            "start": "Closed",
+            "event": "OpenClose",
+            "target": "Opend",
+            "action": true,
+            "guard": true
+        },
+        {
+            "start": "Opened",
+            "event": "OpenClose",
+            "target": "Closed",
+            "action": true
+        },
+        {
+            "start": "Closed",
+            "event": "Play",
+            "target": "Playing",
+            "action": true,
+            "guard": true
+        },
+        {
+            "start": "Playing",
+            "event": "Stop",
+            "target": "Closed",
+            "action": true
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "machine": "machine_name",
+    "init_state": "S",
+    "transition_table": [
+        [
+            "S",
+            "SA",
+            "A",
+            false,
+            true
+        ],
+        [
+            "A",
+            "AB",
+            "B",
+            false,
+            true
+        ],
+        [
+            "A",
+            "AC",
+            "C",
+            false,
+            true
+        ],
+        [
+            "B",
+            "BC",
+            "C",
+            false,
+            true
+        ]
+    ]
+}
