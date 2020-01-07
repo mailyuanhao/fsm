@@ -1,6 +1,6 @@
 import fsm
 import os
-import sys
+from typing import List
 from operator import attrgetter
 
 EVENT_DEF = "/*@@_USER_EVENT_ENUM_@@*/"
@@ -10,6 +10,9 @@ GUARD_FUNCS_DEF = "/*@@_USER_EVENTS_DEF_@@*/"
 INIT_EVENT_CASE_DEF = "/*@@_INIT_EVENT_BODY_@@*/"
 INIT_ENTRY_STATE_DEF = "/*@@_ENTRY_STAE_ENUM_@@*/"
 RL_DEF = "/*@@_RLS_@@*/"
+MACHINE_NAME_DEF = "/*@@_MACHINE_NAME_@@*/"
+HEADER_GUARD_DEF = "/*@@_ML_HEADER_NAME_DEF_H_@@*/"
+HEADER_FILE_NAME_DEF = "/*@@_HEADER_NAME_@@*/"
 
 
 class Machine2CL:
@@ -20,13 +23,14 @@ class Machine2CL:
 
     def __load_template(self) -> (str, str):
         dir = os.path.dirname(os.path.abspath(__file__))
-        with open(dir + r"/c_template/header_template.h") as header, open(dir + r"/c_template/src_template.c") as src:
+        with open(dir + r"/c_template/header_template.h") as header, open(dir + r"/c_template/src_template.rl") as src:
             h = header.read()
             s = src.read()
         return h, s
 
     def __set_init_state(self, src, states_enum):
-        return src.replace(INIT_ENTRY_STATE_DEF, states_enum[self.machine.init_state])
+        return src.replace(INIT_ENTRY_STATE_DEF,
+                           states_enum[self.machine.init_state])
 
     def __mk_user_state_names(self, states_enum) -> str:
         machine = self.machine
@@ -81,7 +85,12 @@ class Machine2CL:
             ee=ee[k], es=es[k]) for k in ee.keys()]
 
     def __join_state_tr(self, trs: List[fsm.Transition]):
-        trs = sorted(trs, attrgetter("sn"))
+        '''
+        允许一个状态接收同一个事件，有多种跳转方式。
+        依照用户配置的顺序挨个尝试每种跳转的guard（如果没有guard，默认允许），直到第一个允许的
+        guard，则执行该跳转。
+        '''
+        trs = sorted(trs, key=attrgetter("sn"))
         event_2_transition = dict()
         for tr in trs:
             if tr.event in event_2_transition:
@@ -90,9 +99,12 @@ class Machine2CL:
                 event_2_transition[tr.event] = [tr]
         return event_2_transition
 
-    def __set_state_rl(self, state: fsm.State, event_2_enum, event_2_ragel_str):
+    def __set_state_rl(self, state: fsm.State,
+                       state_2_enum,
+                       event_2_enum,
+                       event_2_ragel_str):
         transition_template = '"{s}" @ {action};'
-        entry_template = '''{state_name}: = |* {transitions} * | '''
+        entry_template = '''{state_name}:= |* {transitions} *|;'''
 
         state_event_2_trs = self.__join_state_tr(state.leave_transition)
 
@@ -104,24 +116,64 @@ class Machine2CL:
             rl_tr = transition_template.format(
                 s=event_2_ragel_str[t], action=action_name)
             rl_tr_entry.append(rl_tr)
-        return entry_template.format(state_name=state.name,
-                                     transitions=self.line_split.join(
-                                         rl_tr_entry)
-                                     )
 
-    def __write_all_ragel_entrys(self, src, event_2_enum, event_2_ragel_str):
+        # rl state entry Opened: = |* "a" @ Opened_OpenClose; * |
+        if len(rl_tr_entry) == 0:
+            rl_tr_entry.append("any*;")
+        rl_state_entry = entry_template.format(state_name=state.name,
+                                               transitions=self.line_split.join(
+                                                   rl_tr_entry)
+                                               )
+
+        # rl entry action 代码片段
+        action_rl_list = list()
+        action_template = 'action {name} {{ {body} }}'
+        for e, trs in state_event_2_trs.items():
+            trc = list()
+            trc_template = "if ({guard}){{ pm->state={ts_enum};{action}; fgoto {target_state}; }}"
+            for tr in trs:
+                guard_str = "1"  # ok string
+                if tr.guard:
+                    guard_str = "{func}(pm, pbe)".format(
+                        func=tr.guard)
+                action_str = ""
+                if tr.action:
+                    action_str = "{func}(pm, pbe)".format(func=tr.action)
+                trc.append(trc_template.format(guard=guard_str,
+                                               action=action_str,
+                                               target_state=tr.target.name,
+                                               ts_enum=state_2_enum[tr.target]))
+            action_rl = action_template.format(
+                name=state_event_2_tr_action_name[e], body=self.line_split.join(trc))
+            action_rl_list.append(action_rl)
+
+        return self.line_split.join(action_rl_list) + self.line_split + rl_state_entry + self.line_split
+
+    def __write_all_ragel_entrys(self,
+                                 src,
+                                 state_2_enum,
+                                 event_2_enum,
+                                 event_2_ragel_str):
         state_rls = list()
         for s in self.machine.states:
             state_rls.append(self.__set_state_rl(
-                s, event_2_enum, event_2_ragel_str))
-        return src.replace(RL_DEF, self.line_split.join(state_rls))
+                s, state_2_enum,
+                event_2_enum, event_2_ragel_str))
+        state_rls.append(
+            "main:=any* @{{fgoto {init};}};".format(init=self.machine.init_state))
+        return src.replace(RL_DEF, (self.line_split * 2).join(state_rls))
 
-    def show(self, header_fp, rl_fp):
+    def show(self, header_name: str, header_fp, rl_fp):
         h, s = self.__load_template()
+
+        h = h.replace(HEADER_GUARD_DEF, "_{0}_H_".format(header_name.upper()))
+        s = s.replace(HEADER_FILE_NAME_DEF, header_name)
 
         state_2_enum = self.__mk_user_state_enum()
         h = h.replace(STATE_DEF, self.__mk_user_state_names(state_2_enum))
         s = self.__set_init_state(s, state_2_enum)
+
+        s = s.replace(MACHINE_NAME_DEF, self.machine.name)
 
         event_2_enum = self.__mk_user_event_enum_names()
         h = self.__write_user_event_enums(h, event_2_enum)
@@ -134,7 +186,9 @@ class Machine2CL:
         s = s.replace(INIT_EVENT_CASE_DEF, self.line_split.join(
             self.__mk_init_event_cases(event_2_enum, event_2_ragel_str)))
 
-        s = self.__write_all_ragel_entrys(s, event_2_enum, event_2_ragel_str)
+        s = self.__write_all_ragel_entrys(
+            s, state_2_enum,
+            event_2_enum, event_2_ragel_str)
 
         header_fp.write(h)
         rl_fp.write(s)

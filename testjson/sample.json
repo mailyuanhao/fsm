@@ -1,5 +1,5 @@
 {
-    "machine": "machine_name",
+    "machine": "CD_MACHINE",
     "init_state": "Closed",
     "transition_table": [
         {
@@ -26,7 +26,7 @@
             "start": "Closed",
             "event": "Play",
             "target": "PalyInvalid",
-            "action": true,
+            "action": false,
             "guard": true
         },
         [

@@ -1,7 +1,6 @@
 import os
 import sys
 import unittest
-from io import StringIO
 
 import fsm
 from fsm2cl import Machine2CL
@@ -17,7 +16,6 @@ class FSM2ClTest(unittest.TestCase):
 
     def test_machine2cl(self):
         mc = Machine2CL(self.machine)
-        h = StringIO()
-        rl = StringIO()
-        mc.show(h, rl)
-        print(h.getvalue(), rl.getvalue())
+        dir = os.path.dirname(os.path.abspath(__file__))
+        with open(dir + r"/test_machine.h", r"w") as header, open(dir + r"/src.rl", r"w") as src:
+            mc.show("test_machine", header, src)

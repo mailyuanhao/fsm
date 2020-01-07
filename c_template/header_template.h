@@ -1,5 +1,5 @@
-#ifndef _ML_DEF_H_
-#define _ML_DEF_H_
+#ifndef /*@@_ML_HEADER_NAME_DEF_H_@@*/
+#define /*@@_ML_HEADER_NAME_DEF_H_@@*/
 
 enum
 {
@@ -37,11 +37,6 @@ void user_free(void *);
 /*@@_USER_ACTIONS_DEF_@@*/
 
 //0 for deny 1 for ok
-enum
-{
-    deny = 0,
-    allowd,
-};
 /*@@_USER_EVENTS_DEF_@@*/
 
 #endif //_ML_DEF_H_

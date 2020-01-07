@@ -1,2 +1,6 @@
 *.pyc
 .vscode/settings.json
+*.rl
+*.h
+*.o
+*.c
