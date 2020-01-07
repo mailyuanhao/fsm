@@ -1,16 +1,13 @@
 /*@@_INC_HEADER_@@*/
 #include "header_template.h"
 
-/*@@_EVENT_STR_DEF_@@*/
-const char *event_a = "a";
-
 typedef struct __inner_ml
 {
 } inner_ml, *pinner_ml;
 
 void init_machine(pMachine machine)
 {
-    machine->state = /*@@_ENTRY_SATE_ENUM_@@*/; /*entry state*/
+    machine->state = /*@@_ENTRY_STAE_ENUM_@@*/; /*entry state*/
 
     pinner_ml pl = (pinner_ml)(machine->_inner_ml);
 
@@ -80,7 +77,7 @@ void process(pMachine pm, pBaseEvent pe)
     //todo
 
     //%%{
-
+        /*@@_RLS_@@*/
     //%%
 
     //%% ragel exec

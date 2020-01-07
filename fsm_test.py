@@ -20,8 +20,8 @@ class FsmTest(unittest.TestCase):
     def test_mk_fsm(self):
         with open(self.project_path + r"/testjson/sample.json") as fp:
             f = fsm.FsmLoaderFromJson().load(fp)
-            self.assertEqual(len(f.states), 3)
-            self.assertTrue(all(x.name in ("Opened", "Closed", "Playing")
+            self.assertEqual(len(f.states), 4)
+            self.assertTrue(all(x.name in ("Opened", "Closed", "Playing", "PalyInvalid")
                                 for x in f.states))
 
             self.assertEqual(len(f.events), 3)

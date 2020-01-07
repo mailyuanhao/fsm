@@ -7,6 +7,7 @@ EVENT_NAME = "event"
 TARGET_NAME = "target"
 ACTION_NAME = "action"
 GUARD_NAME = "guard"
+SN_NAME = "sn"
 MACHINE_NAME = "machine"
 INIT_STATE_NAME = "init_state"
 TRANSITION_TABLE_NAME = "transition_table"
@@ -70,18 +71,27 @@ class State(Item):
         self.enter_transition = list()
         self.leave_transition = list()
 
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return self.name == other.name
+
 
 class Event(Item):
     pass
 
 
 class Transition:
-    def __init__(self, start: State, event: Event, target: State, action: str, guard: str):
+    def __init__(self, start: State, event: Event, target: State, action: str, guard: str, sn: int):
         self.start = start
         self.event = event
         self.target = target
         self.action = action
         self.guard = guard
+        self.sn = sn
 
 
 class FSMMachine:
@@ -89,11 +99,23 @@ class FSMMachine:
         self.name = name
         self.init_state_name = init_state_name
         self.init_state = None
-        self.transition_table = list()
-        self.states = set()
-        self.events = set()
+        self.__transition_table = list()
+        self.__states = set()
+        self.__events = set()
         self.__mk_transition_table(transition_dict_table)
         self.__check_machine()
+
+    @property
+    def events(self):
+        return self.__events
+
+    @property
+    def states(self):
+        return self.__states
+
+    @property
+    def transition_table(self):
+        return self.__transition_table
 
     def __str__(self):
         return self.name
@@ -106,6 +128,8 @@ class FSMMachine:
             s = self.__new_state(trd.transition_dict[START_NAME])
             e = self.__new_event(trd.transition_dict[EVENT_NAME])
             t = self.__new_state(trd.transition_dict[TARGET_NAME])
+            sn = trd.transition_dict[SN_NAME]
+
             a = None
             if ACTION_NAME in trd.transition_dict and trd.transition_dict[ACTION_NAME]:
                 a = "from_{0}_to_{1}_event_{2}_action".format(
@@ -115,10 +139,10 @@ class FSMMachine:
                 g = "from_{0}_to_{1}_event_{2}_guard".format(
                     s.name, t.name, e.name)
 
-            tr = Transition(s, e, t, a, g)
+            tr = Transition(s, e, t, a, g, sn)
             s.leave_transition.append(tr)
             t.enter_transition.append(tr)
-            self.transition_table.append(tr)
+            self.__transition_table.append(tr)
 
     def __check_machine(self):
         if len(self.transition_table) == 0:
@@ -132,19 +156,19 @@ class FSMMachine:
                     raise ValueError("Not Init State has no enter transition")
 
     def __new_state(self, name: str):
-        for x in self.states:
+        for x in self.__states:
             if name == x.name:
                 return x
         x = State(name)
-        self.states.add(x)
+        self.__states.add(x)
         return x
 
     def __new_event(self, name: str):
-        for x in self.events:
+        for x in self.__events:
             if name == x.name:
                 return x
         x = Event(name)
-        self.events.add(x)
+        self.__events.add(x)
         return x
 
 
@@ -152,11 +176,13 @@ class FsmLoaderFromJson:
     def __init__(self):
         pass
 
-    def __mk_td(self, o):
+    def __mk_td(self, o, i):
         if isinstance(o, dict):
+            o[SN_NAME] = i
             return o
         elif isinstance(o, list) and len(o) >= 3:
-            d = {START_NAME: o[0], EVENT_NAME: o[1], TARGET_NAME: o[2]}
+            d = {START_NAME: o[0], EVENT_NAME: o[1],
+                 TARGET_NAME: o[2], SN_NAME: i}
             if len(o) >= 4:
                 d[ACTION_NAME] = o[3]
             if len(o) >= 5:
@@ -174,8 +200,9 @@ class FsmLoaderFromJson:
         if ELEM_NAME_RE.match(name) is None:
             raise ValueError("Invalid state name {0}".format(init_state))
 
-        trs = [TransitionDict(self.__mk_td(d))
-               for d in obj[TRANSITION_TABLE_NAME]]
+        trt = obj[TRANSITION_TABLE_NAME]
+        trs = [TransitionDict(self.__mk_td(d[0], d[1]))
+               for d in zip(trt, range(len(trt)))]
 
         return FSMMachine(name, init_state, trs)
 
@@ -226,7 +253,7 @@ class Machine2Dot:
                                      l=label)
         return [t]
 
-    def show(self, fsm: FSMMachine):
+    def Show(self, fsm: FSMMachine):
         g = []
         g.append("digraph {0} {{".format(
             fsm.name))

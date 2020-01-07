@@ -15,7 +15,7 @@ class FSM2ClTest(unittest.TestCase):
         with open(self.project_path + r"/testjson/sample.json") as fp:
             self.machine = fsm.FsmLoaderFromJson().load(fp)
 
-    def test_mk_event_enum(self):
+    def test_machine2cl(self):
         mc = Machine2CL(self.machine)
         h = StringIO()
         rl = StringIO()
