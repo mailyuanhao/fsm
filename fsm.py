@@ -93,6 +93,10 @@ class Transition:
         self.guard = guard
         self.sn = sn
 
+    def __check(self):
+        if self.start == self.target:
+            raise ValueError("Transition start can not equal to target")
+
 
 class FSMMachine:
     def __init__(self, name: str, init_state_name: str, transition_dict_table: List[TransitionDict]):
