@@ -31,8 +31,31 @@ void delete_machine(pMachine p);
 pBaseEvent new_event(int type);
 void delete_event(pBaseEvent p);
 
+//Plz implement these memory functions
 void *user_malloc(int size);
 void user_free(void *);
+
+void process(pMachine pm, pBaseEvent pbe);
+
+//how to play
+/*
+{
+pMachine m = new_machine();
+m->user_data=YourCtx;
+
+pBaseEvent p = new_event(EventTypeEnum);
+process(m, p);
+delete_event(p);
+
+pBaseEvent p2 = new_event(EventTypeEnum);
+process(m, p2);
+delete_event(p2);
+
+delete_machine(m);
+}
+*/
+
+//implement your atcions and guards
 
 /*@@_USER_ACTIONS_DEF_@@*/
 

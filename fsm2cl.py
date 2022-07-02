@@ -1,6 +1,6 @@
 import fsm
 import os
-from typing import List
+from typing import List, Tuple
 from operator import attrgetter
 
 EVENT_DEF = "/*@@_USER_EVENT_ENUM_@@*/"
@@ -21,7 +21,7 @@ class Machine2CL:
         self.machine = machine
         self.line_split = "\n"
 
-    def __load_template(self) -> (str, str):
+    def __load_template(self) -> Tuple[str, str]:
         dir = os.path.dirname(os.path.abspath(__file__))
         with open(dir + r"/c_template/header_template.h") as header, open(dir + r"/c_template/src_template.rl") as src:
             h = header.read()
