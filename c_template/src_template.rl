@@ -1,7 +1,9 @@
 /*@@_INC_HEADER_@@*/
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include "/*@@_HEADER_NAME_@@*/.h"
 
+namespace /*@@_NAMESPACE_NAME_@@*/{
 %% machine /*@@_MACHINE_NAME_@@*/;
 
 typedef struct __inner_ml
@@ -14,6 +16,17 @@ typedef struct __inner_ml
 
 %%write data;
 
+#ifndef USE_USER_MEM_ALLOCATION
+void *user_malloc(int size)
+{
+    return malloc(size);
+}
+
+void user_free(void * p)
+{
+    return free(p);
+}
+#endif
 
 int init_event(int type, pBaseEvent event)
 {
@@ -96,4 +109,5 @@ pMachine new_machine()
 
 
     return p;
+}
 }

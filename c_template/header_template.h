@@ -1,6 +1,8 @@
 #ifndef /*@@_ML_HEADER_NAME_DEF_H_@@*/
 #define /*@@_ML_HEADER_NAME_DEF_H_@@*/
 
+namespace /*@@_NAMESPACE_NAME_@@*/{
+
 enum
 {
     /*@@_USER_STATE_ENUM_@@*/
@@ -62,4 +64,5 @@ delete_machine(m);
 //0 for deny 1 for ok
 /*@@_USER_EVENTS_DEF_@@*/
 
+}
 #endif //_ML_DEF_H_

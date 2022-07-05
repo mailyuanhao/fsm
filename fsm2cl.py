@@ -1,3 +1,4 @@
+from uuid import NAMESPACE_DNS
 import fsm
 import os
 from typing import List, Tuple
@@ -13,6 +14,7 @@ RL_DEF = "/*@@_RLS_@@*/"
 MACHINE_NAME_DEF = "/*@@_MACHINE_NAME_@@*/"
 HEADER_GUARD_DEF = "/*@@_ML_HEADER_NAME_DEF_H_@@*/"
 HEADER_FILE_NAME_DEF = "/*@@_HEADER_NAME_@@*/"
+NAMESPACE_NAME_DEF = "/*@@_NAMESPACE_NAME_@@*/" 
 
 
 class Machine2CL:
@@ -189,6 +191,9 @@ class Machine2CL:
         s = self.__write_all_ragel_entrys(
             s, state_2_enum,
             event_2_enum, event_2_ragel_str)
+
+        h = h.replace(NAMESPACE_NAME_DEF, self.machine.name.lower())
+        s = s.replace(NAMESPACE_NAME_DEF, self.machine.name.lower())
 
         header_fp.write(h)
         rl_fp.write(s)
