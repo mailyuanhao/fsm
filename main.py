@@ -14,8 +14,8 @@ def parse_args():
     return parse.parse_args()
 
 def check_args(args :dict):
-    src = dict[SRC_DEF][0]
-    dest = dict[DEST_DEF][0]
+    src = args[SRC_DEF][0]
+    dest = args[DEST_DEF][0]
 
     if not src.exists() or not dest.exists:
         raise Exception("src or dest not exists")
