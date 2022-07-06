@@ -12,7 +12,7 @@ Json 文件示例查看 testjson/sample.json
 ![image-20220705163222769](README.assets/image-20220705163222769.png)
 
 ```shell
-python3 main.py your_json_file output_path
+python3 json2rl.py your_json_file output_path
 ragel xxxx.rl -o xxxx.cpp
 ```
 ## C++源文件使用
@@ -49,3 +49,7 @@ delete_machine(m);
 ![image-20220705164052382](README.assets/image-20220705164052382.png)
 
 > 具体使用方案请参照testcpp/main.cpp的使用方法
+
+## TODO
+
+1. 考虑后续生成Boost msm的代码替代ragel代码的方案
