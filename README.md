@@ -44,5 +44,8 @@ delete_machine(m);
 
 1. 如果用户自定义内存分配函数，请定义USE_USER_MEM_ALLOCATION宏后，提供 usermalloc和user_free函数实现，默认使用malloc和free；
 2. 用户自行实现guard和action的实现；
+3. unexpected_event_action在接收到当前未指定状态迁移方案的事件时触发，触发后不会修改状态机状态；
 
 ![image-20220705164052382](README.assets/image-20220705164052382.png)
+
+> 具体使用方案请参照testcpp/main.cpp的使用方法
