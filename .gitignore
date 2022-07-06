@@ -4,3 +4,5 @@
 *.h
 *.o
 *.c
+*/build/*
+*/.xmake/*

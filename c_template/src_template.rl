@@ -31,6 +31,7 @@ void user_free(void * p)
 int init_event(int type, pBaseEvent event)
 {
     int ret = 1;
+    event->user_data = 0;
     event->event = type;
     switch (type)
     {

@@ -22,6 +22,9 @@ class Machine2CL:
         super().__init__()
         self.machine = machine
         self.line_split = "\n"
+        #为了防止状态机进入异常状态，状态机接收到非期望的event时会忽略掉该event，并调用如下函数
+        self.unexpected_event_action_name = "UNEXPECTED_EVENT_ACTION"
+        self.unexpected_event_action_function_name = "unexpected_event_action"
 
     def __load_template(self) -> Tuple[str, str]:
         dir = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +68,7 @@ class Machine2CL:
         t = "void {func} (pMachine, pBaseEvent);"
         actions = [t.format(func=x.action)
                    for x in self.machine.transition_table if x.action]
+        actions.append(t.format(func=self.unexpected_event_action_function_name))
         return "\n".join(actions)
 
     def __mk_guard_funcs(self) -> str:
@@ -120,8 +124,7 @@ class Machine2CL:
             rl_tr_entry.append(rl_tr)
 
         # rl state entry Opened: = |* "a" @ Opened_OpenClose; * |
-        if len(rl_tr_entry) == 0:
-            rl_tr_entry.append("any*;")
+        rl_tr_entry.append('{s} @ {action};'.format(s="any*", action=self.unexpected_event_action_name))
         rl_state_entry = entry_template.format(state_name=state.name,
                                                transitions=self.line_split.join(
                                                    rl_tr_entry)
@@ -157,6 +160,12 @@ class Machine2CL:
                                  event_2_enum,
                                  event_2_ragel_str):
         state_rls = list()
+
+        #添加未预期的事件action
+        state_rls.append('action {name} {{ {body}(pm, pbe); }}'.format(
+            name=self.unexpected_event_action_name,
+            body=self.unexpected_event_action_function_name))
+
         for s in self.machine.states:
             state_rls.append(self.__set_state_rl(
                 s, state_2_enum,
