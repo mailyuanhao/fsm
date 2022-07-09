@@ -2,6 +2,7 @@
 .vscode/settings.json
 *.rl
 *.h
+*.cpp
 *.o
 *.c
 */build/*

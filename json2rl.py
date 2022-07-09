@@ -1,8 +1,7 @@
 import argparse
-from tabnanny import check
+from pathlib import Path
 import fsm
 from fsm2cl import Machine2CL
-from pathlib import Path
 
 SRC_DEF = "source json file"
 DEST_DEF = "dest folder"
