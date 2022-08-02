@@ -257,7 +257,7 @@ class Machine2Dot:
                                      l=label)
         return [t]
 
-    def Show(self, fsm: FSMMachine):
+    def show(self, fsm: FSMMachine):
         g = []
         g.append("digraph {0} {{".format(
             fsm.name))

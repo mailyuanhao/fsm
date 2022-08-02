@@ -31,5 +31,5 @@ class FsmTest(unittest.TestCase):
     def test_mk_dot(self):
         with open(self.project_path + r"/testjson/sample_dot.json") as fp:
             f = fsm.FsmLoaderFromJson().load(fp)
-            dot = fsm.Machine2Dot().Show(f)
+            dot = fsm.Machine2Dot().show(f)
             print(dot)

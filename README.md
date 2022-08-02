@@ -15,6 +15,9 @@ Json 文件示例查看 testjson/sample.json
 python3 json2rl.py your_json_file output_path
 ragel xxxx.rl -o xxxx.cpp
 ```
+
+> json2rl.py 会在标准输出，输出状态机的dot格式定义，可使用相关文件，可视化进行查看
+
 ## C++源文件使用
 
 ### 状态机使用
@@ -49,6 +52,8 @@ delete_machine(m);
 ![image-20220705164052382](README.assets/image-20220705164052382.png)
 
 > 具体使用方案请参照testcpp/main.cpp的使用方法
+
+### genimplfile.py 可以用于处理最终生成的文件，封装成c++的使用方式。可以按需使用
 
 ## TODO
 
